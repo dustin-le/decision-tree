@@ -3,6 +3,7 @@
 
 from sys import argv
 import numpy as np
+from scipy import stats
 
 def decision_tree(training_file, test_file, option, pruning_thr):
     train = []
@@ -16,4 +17,11 @@ def decision_tree(training_file, test_file, option, pruning_thr):
         for line in testing:
             test.append(line.split())
 
+    train = np.array(train).astype(np.float)
+    test = np.array(test).astype(np.float)
+
+    rows = train.shape[0]
+    columns = train.shape[1]
+    
+decision_tree(argv[1], argv[2], argv[3], argv[4])
     
