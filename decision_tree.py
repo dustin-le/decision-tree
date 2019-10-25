@@ -15,13 +15,12 @@ def choose_attribute(examples, attributes, option):
             attribute_values = examples.T[A]
             L = min(attribute_values)
             M = max(attribute_values)
-
-            # * Debug
-            print(L, M)
             
             for K in range(1, 51):
                 threshold = L + K * (M - L) / 51
                 gain = information_gain(examples, A, threshold)
+                break
+            break
 
     #             if gain > max_gain:
     #                 max_gain = gain
@@ -47,7 +46,7 @@ def choose_attribute(examples, attributes, option):
     #             best_threshold = threshold
     # return (best_attribute, best_threshold)
 
-def DTL(examples, attributes, default):
+def DTL(examples, attributes, default, option):
     if examples == []:
         return default
     
@@ -55,17 +54,41 @@ def DTL(examples, attributes, default):
 
     # else:
 
-# ! How do you do information gain with no entropies for the child nodes?
 def information_gain(examples, A, threshold):
-    left = right = 0
+    # Initialize indices and entropies
+    i = left = right = main_entropy = left_entropy = right_entropy = 0
+
+    # Initialize the total number of inputs
+    total = examples.shape[0]
+
+    # Keep track of the classes
+    classes = examples.T[examples.T.shape[0] - 1]
+
+    # Initialize the class counters for the main, left, and right entropies
+    main_count = np.zeros(int(max(examples.T[examples.T.shape[0] - 1])))
+    left_count = np.zeros(int(max(examples.T[examples.T.shape[0] - 1])))
+    right_count = np.zeros(int(max(examples.T[examples.T.shape[0] - 1])))
+
     for val in examples.T[A]:
+        main_count[int(classes[i] - 1)] += 1
+        i += 1
         if val < threshold:
+            left_count[int(classes[left] - 1)] += 1
             left += 1
         elif val >= threshold:
+            right_count[int(classes[right] - 1)] += 1
             right += 1
-    
-    main_entropy = -(left / (left + right) * log2(left / (left + right))) - -(right / (left + right) * log2(right / (left + right)))
 
+    # Calculate the entropies
+    for j in range(main_count.size):
+        main_entropy -= main_count[j] / total * log2(main_count[j] / total)
+    for j in range(left_count.size):
+        left_entropy -= left_count[j] / total * log2(left_count[j] / total)
+    for j in range(right_count.size):
+        right_entropy -= right_count[j] / total * log2(right_count[j] / total)
+    
+    # Return the information gain
+    return (main_entropy - sum(left_count) / total * left_entropy - sum(right_count) / total * right_entropy)
 
 def decision_tree(training_file, test_file, option, pruning_thr):
     train = []
