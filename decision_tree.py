@@ -6,8 +6,18 @@ import numpy as np
 import random
 from math import log2
 
+def DTL(examples, attributes, default, option):
+    if examples.size == 0:
+        return default
+    
+    # If all examples have the same class, then return the class
+    elif (len(set(examples[:, -1])) == 1):
+        return examples[:, -1][0]
+    
+    else:
+        (best_attribute, best_threshold) = choose_attribute(examples, attributes, option)
+
 def choose_attribute(examples, attributes, option):
-    # ! I noticed that the min and max of all attributes is 0 and 100, so it's redundantly calculating the threshold.
     # Optimized
     if (option == 'optimized'):
         max_gain = best_attribute = best_threshold = -1
@@ -26,31 +36,23 @@ def choose_attribute(examples, attributes, option):
                     best_threshold = threshold
         return (best_attribute, best_threshold)
 
-    # # Randomized
-    # if (option == 'randomized'):
-    #     max_gain = best_attribute = best_threshold = -1
-    #     A = random.choice(attributes)
-    #     attribute_values = examples.T[A]
-    #     L = min(attribute_values)
-    #     M = max(attribute_values)
+    # Randomized
+    if (option == 'randomized'):
+        max_gain = best_attribute = best_threshold = -1
+        A = random.choice(attributes)
+        attribute_values = examples.T[A]
+        L = min(attribute_values)
+        M = max(attribute_values)
         
-    #     for K in range(1, 51):
-    #         threshold = L + K * (M - L) / 51
-    #         gain = information_gain(examples, A, threshold)
+        for K in range(1, 51):
+            threshold = L + K * (M - L) / 51
+            gain = information_gain(examples, A, threshold)
 
-    #         if gain > max_gain:
-    #             max_gain = gain
-    #             best_attribute = A
-    #             best_threshold = threshold
-    # return (best_attribute, best_threshold)
-
-def DTL(examples, attributes, default, option):
-    if examples == []:
-        return default
-    
-    # else if all examples have the same class, return class
-
-    # else:
+            if gain > max_gain:
+                max_gain = gain
+                best_attribute = A
+                best_threshold = threshold
+    return (best_attribute, best_threshold)
 
 def information_gain(examples, A, threshold):
     # Initialize indices and entropies
@@ -67,9 +69,9 @@ def information_gain(examples, A, threshold):
     left_count = np.zeros(int(max(examples.T[examples.T.shape[0] - 1]) + 1))
     right_count = np.zeros(int(max(examples.T[examples.T.shape[0] - 1]) + 1))
 
+    # Count the class alongside calculating where the value belongs based on the threshold
     for val in examples.T[A]:
         main_count[int(classes[i])] += 1
-        print(int(classes[i]))
         i += 1
         if val < threshold:
             left_count[int(classes[left])] += 1
@@ -98,6 +100,14 @@ def information_gain(examples, A, threshold):
     # Return the information gain
     return (main_entropy - sum(left_count) / total * left_entropy - sum(right_count) / total * right_entropy)
 
+def distribution(examples):
+    count = np.zeros(int(max(examples.T[examples.T.shape[0] - 1]) + 1))
+    for val in examples[:, -1]:
+        count[int(val)] += 1
+    # Return array of probability of i-th class
+    return count / sum(count)
+        
+
 def decision_tree(training_file, test_file, option, pruning_thr):
     train = []
     test = []
@@ -116,16 +126,12 @@ def decision_tree(training_file, test_file, option, pruning_thr):
     rows = train.shape[0]
     columns = train.shape[1]
 
-    # ! The instructions say not to include the last column (class labels), but the pseudocode (slide 27) says we should.
     examples = np.array(train)
     attributes = []
     for i in range(columns - 1):
         attributes.append(i)
     
-    # * Debug - Remove once done
-    choose_attribute(examples, attributes, option)
-    
-
+    DTL(examples, attributes, distribution(examples), option)
     
 decision_tree(argv[1], argv[2], argv[3], argv[4])
     
