@@ -19,14 +19,12 @@ def choose_attribute(examples, attributes, option):
             for K in range(1, 51):
                 threshold = L + K * (M - L) / 51
                 gain = information_gain(examples, A, threshold)
-                break
-            break
 
-    #             if gain > max_gain:
-    #                 max_gain = gain
-    #                 best_attribute = A
-    #                 best_threshold = threshold
-    #     return (best_attribute, best_threshold)
+                if gain > max_gain:
+                    max_gain = gain
+                    best_attribute = A
+                    best_threshold = threshold
+        return (best_attribute, best_threshold)
 
     # # Randomized
     # if (option == 'randomized'):
@@ -81,11 +79,20 @@ def information_gain(examples, A, threshold):
 
     # Calculate the entropies
     for j in range(main_count.size):
-        main_entropy -= main_count[j] / total * log2(main_count[j] / total)
+        if (main_count[j] != 0):
+            main_entropy -= main_count[j] / total * log2(main_count[j] / total)
+        else:
+            continue
     for j in range(left_count.size):
-        left_entropy -= left_count[j] / total * log2(left_count[j] / total)
+        if (left_count[j] != 0):
+            left_entropy -= left_count[j] / total * log2(left_count[j] / total)
+        else:
+            continue
     for j in range(right_count.size):
-        right_entropy -= right_count[j] / total * log2(right_count[j] / total)
+        if (right_count[j] != 0):
+            right_entropy -= right_count[j] / total * log2(right_count[j] / total)
+        else:
+            continue
     
     # Return the information gain
     return (main_entropy - sum(left_count) / total * left_entropy - sum(right_count) / total * right_entropy)
