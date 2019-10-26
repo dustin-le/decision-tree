@@ -63,18 +63,19 @@ def information_gain(examples, A, threshold):
     classes = examples.T[examples.T.shape[0] - 1]
 
     # Initialize the class counters for the main, left, and right entropies
-    main_count = np.zeros(int(max(examples.T[examples.T.shape[0] - 1])))
-    left_count = np.zeros(int(max(examples.T[examples.T.shape[0] - 1])))
-    right_count = np.zeros(int(max(examples.T[examples.T.shape[0] - 1])))
+    main_count = np.zeros(int(max(examples.T[examples.T.shape[0] - 1]) + 1))
+    left_count = np.zeros(int(max(examples.T[examples.T.shape[0] - 1]) + 1))
+    right_count = np.zeros(int(max(examples.T[examples.T.shape[0] - 1]) + 1))
 
     for val in examples.T[A]:
-        main_count[int(classes[i] - 1)] += 1
+        main_count[int(classes[i])] += 1
+        print(int(classes[i]))
         i += 1
         if val < threshold:
-            left_count[int(classes[left] - 1)] += 1
+            left_count[int(classes[left])] += 1
             left += 1
         elif val >= threshold:
-            right_count[int(classes[right] - 1)] += 1
+            right_count[int(classes[right])] += 1
             right += 1
 
     # Calculate the entropies
