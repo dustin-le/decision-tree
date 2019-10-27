@@ -6,8 +6,15 @@ import numpy as np
 import random
 from math import log2
 
+class Tree(object):
+    def __init__(self):
+        self.left = None
+        self.right = None
+        self.attribute = None
+        self.threshold = None
+
 def DTL(examples, attributes, default, option):
-    if examples.size == 0:
+    if len(examples) == 0:
         return default
     
     # If all examples have the same class, then return the class
@@ -16,6 +23,28 @@ def DTL(examples, attributes, default, option):
     
     else:
         (best_attribute, best_threshold) = choose_attribute(examples, attributes, option)
+        tree = Tree()
+        tree.attribute = best_attribute
+        tree.threshold = best_threshold
+
+        examples_left = []
+        examples_left = np.array(examples_left)
+        examples_right = []
+        examples_right = np.array(examples_right)
+        i = 0
+        for val in examples.T[best_attribute]:
+            if val < best_threshold:
+                np.append(examples_left, examples[i])
+                i += 1
+            elif val >= best_threshold:
+                np.append(examples_right, examples[i])
+                i += 1
+        
+        tree.left = DTL(examples_left, attributes, distribution(examples), option)
+        tree.right = DTL(examples_right, attributes, distribution(examples), option)
+
+        return tree
+
 
 def choose_attribute(examples, attributes, option):
     # Optimized
@@ -132,6 +161,6 @@ def decision_tree(training_file, test_file, option, pruning_thr):
         attributes.append(i)
     
     DTL(examples, attributes, distribution(examples), option)
-    
+
 decision_tree(argv[1], argv[2], argv[3], argv[4])
     
