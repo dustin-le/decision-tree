@@ -77,7 +77,7 @@ def choose_attribute(examples, attributes, option):
                     max_gain = gain
                     best_attribute = A
                     best_threshold = threshold
-        return (best_attribute, best_threshold)
+        return (best_attribute, best_threshold, gain)
 
     # Randomized
     if (option == 'randomized'):
@@ -95,7 +95,7 @@ def choose_attribute(examples, attributes, option):
                 max_gain = gain
                 best_attribute = A
                 best_threshold = threshold
-    return (best_attribute, best_threshold)
+    return (best_attribute, best_threshold, gain)
 
 def information_gain(examples, A, threshold):
     # Initialize indices and entropies
