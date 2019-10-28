@@ -1,7 +1,7 @@
 # Dustin Le
 # 1001130689
 
-from sys import argv
+from sys import argv, setrecursionlimit
 import numpy as np
 import random
 from math import log2
@@ -149,7 +149,6 @@ def distribution(examples):
         count[int(val)] += 1
     # Return array of probability of i-th class
     return count / sum(count)
-        
 
 def decision_tree(training_file, test_file, option, pruning_thr):
     train = []
@@ -192,5 +191,22 @@ def decision_tree(training_file, test_file, option, pruning_thr):
                 next_level.append(node.right)
             current_level = next_level
 
+    # Traverse
+    current_level = [tree]
+    # while current_level:
+    for i in range(5):
+        next_level = []
+        for node in current_level:
+            print('tree=%2d, node=%3d, feature=%2d, thr=%6.2f, gain=%f\n' % (1, node.id, node.attribute, node.threshold, node.gain))
+            if (node.left):
+                next_level.append(node.left)
+            if (node.right):
+                next_level.append(node.right)
+            current_level = next_level
+    # print('ID=%5d, output=%14.4f, target value = %10.4f, squared error = %.4f' % (i+1, e[i], t[i], (e[i] - t[i])**2))
+
+s = 0
+nodeID = 1
+setrecursionlimit(5000)
 decision_tree(argv[1], argv[2], argv[3], argv[4])
     
