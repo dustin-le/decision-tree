@@ -174,7 +174,23 @@ def decision_tree(training_file, test_file, option, pruning_thr):
     for i in range(columns - 1):
         attributes.append(i)
     
-    DTL(examples, attributes, distribution(examples), option)
+    tree = DTL(examples, attributes, distribution(examples), option, int(pruning_thr))
+
+    # Assign ID numbers
+    current_level = [tree]
+    temp = 1
+    while current_level:
+        next_level = []
+        for node in current_level:
+            if (node.left):
+                temp += 1
+                node.left.id = temp
+                next_level.append(node.left)
+            if (node.right):
+                temp += 1
+                node.right.id = temp
+                next_level.append(node.right)
+            current_level = next_level
 
 decision_tree(argv[1], argv[2], argv[3], argv[4])
     
