@@ -10,38 +10,52 @@ class Tree(object):
     def __init__(self):
         self.left = None
         self.right = None
+        self.id = 1
         self.attribute = None
         self.threshold = None
+        self.gain = None
 
-def DTL(examples, attributes, default, option):
-    if len(examples) == 0:
-        return default
+def DTL(examples, attributes, default, option, pruning_thr):
+    if len(examples) < pruning_thr:
+        tree = Tree()
+        tree.attribute = max(default)
+        tree.threshold = -1
+        tree.gain = 0
+        return tree
     
     # If all examples have the same class, then return the class
     elif (len(set(examples[:, -1])) == 1):
-        return examples[:, -1][0]
+        tree = Tree()
+        (best_attribute, best_threshold, gain) = choose_attribute(examples, attributes, option)
+        tree.attribute = examples[:, -1][0]
+        tree.threshold = best_threshold
+        tree.gain = gain
+        return tree
     
     else:
-        (best_attribute, best_threshold) = choose_attribute(examples, attributes, option)
+        (best_attribute, best_threshold, gain) = choose_attribute(examples, attributes, option)
         tree = Tree()
         tree.attribute = best_attribute
         tree.threshold = best_threshold
+        tree.gain = gain
 
+        # Appending the data as lists first, and then turning them into np.arrays is more efficient.
         examples_left = []
-        examples_left = np.array(examples_left)
         examples_right = []
-        examples_right = np.array(examples_right)
         i = 0
         for val in examples.T[best_attribute]:
             if val < best_threshold:
-                np.append(examples_left, examples[i])
+                examples_left.append(examples[i])
                 i += 1
             elif val >= best_threshold:
-                np.append(examples_right, examples[i])
+                examples_right.append(examples[i])
                 i += 1
         
-        tree.left = DTL(examples_left, attributes, distribution(examples), option)
-        tree.right = DTL(examples_right, attributes, distribution(examples), option)
+        examples_left = np.array(examples_left)
+        examples_right = np.array(examples_right)
+
+        tree.left = DTL(examples_left, attributes, distribution(examples), option, pruning_thr)
+        tree.right = DTL(examples_right, attributes, distribution(examples), option, pruning_thr)
 
         return tree
 
