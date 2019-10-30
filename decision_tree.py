@@ -15,10 +15,10 @@ class Tree(object):
         self.threshold = None
         self.gain = None
 
-def DTL(examples, attributes, default, option, pruning_thr):
+def DTL(examples, attributes, default, option, pruning_thr, size):
     if len(examples) < pruning_thr:
         tree = Tree()
-        tree.attribute = max(default)
+        tree.attribute = default
         tree.threshold = -1
         tree.gain = 0
         return tree
@@ -54,8 +54,8 @@ def DTL(examples, attributes, default, option, pruning_thr):
         examples_left = np.array(examples_left)
         examples_right = np.array(examples_right)
 
-        tree.left = DTL(examples_left, attributes, distribution(examples), option, pruning_thr)
-        tree.right = DTL(examples_right, attributes, distribution(examples), option, pruning_thr)
+        tree.left = DTL(examples_left, attributes, distribution(examples, size), option, pruning_thr, size)
+        tree.right = DTL(examples_right, attributes, distribution(examples, size), option, pruning_thr, size)
 
         return tree
 
@@ -149,12 +149,12 @@ def information_gain(examples, A, threshold):
     # Return the information gain
     return (main_entropy - sum(left_count) / total * left_entropy - sum(right_count) / total * right_entropy)
 
-def distribution(examples):
-    count = np.zeros(int(max(examples.T[examples.T.shape[0] - 1]) + 1))
+def distribution(examples, size):
+    count = np.zeros(size)
     for val in examples[:, -1]:
         count[int(val)] += 1
     # Return array of probability of i-th class
-    return count / sum(count)
+    return (np.random.choice(np.flatnonzero((count / sum(count)) == (count / sum(count)).max())))
 
 def decision_tree(training_file, test_file, option, pruning_thr):
     train = []
@@ -173,13 +173,14 @@ def decision_tree(training_file, test_file, option, pruning_thr):
 
     rows = train.shape[0]
     columns = train.shape[1]
+    classes = np.unique(train.T[train.shape[1] - 1]).size
 
     examples = np.array(train)
     attributes = []
     for i in range(columns - 1):
         attributes.append(i)
     
-    tree = DTL(examples, attributes, distribution(examples), option, int(pruning_thr))
+    tree = DTL(examples, attributes, distribution(examples, classes), option, int(pruning_thr), classes)
 
     # Assign ID numbers
     current_level = [tree]
