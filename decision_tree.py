@@ -203,12 +203,12 @@ def decision_tree(training_file, test_file, option, pruning_thr):
     # for i in range(5):
         next_level = []
         for node in current_level:
-            print('tree=%2d, node=%3d, feature=%2d, thr=%6.2f, gain=%f\n' % (1, node.id, node.attribute, node.threshold, node.gain))
+            print('tree=%2d, node=%3d, feature=%2d, thr=%6.2f, gain=%f\n' % (1, node.id, node.attribute + 1, node.threshold, node.gain))
             if (node.left):
                 next_level.append(node.left)
             if (node.right):
                 next_level.append(node.right)
             current_level = next_level
-            
+         
 decision_tree(argv[1], argv[2], argv[3], argv[4])
     
