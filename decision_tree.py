@@ -211,8 +211,5 @@ def decision_tree(training_file, test_file, option, pruning_thr):
                 next_level.append(node.right)
             current_level = next_level
             
-s = 0
-nodeID = 1
-setrecursionlimit(5000)
 decision_tree(argv[1], argv[2], argv[3], argv[4])
     
