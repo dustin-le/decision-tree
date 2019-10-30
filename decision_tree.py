@@ -210,6 +210,7 @@ def decision_tree(training_file, test_file, option, pruning_thr):
                 next_level.append(node.right)
             current_level = next_level
 
+    # Classification output
     rows = test.shape[0]
     columns = test.shape[1]
     for i in range(rows):
