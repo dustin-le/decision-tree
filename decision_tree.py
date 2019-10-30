@@ -126,19 +126,23 @@ def information_gain(examples, A, threshold):
     # Calculate the entropies
     for j in range(main_count.size):
         if (main_count[j] != 0):
-            main_entropy -= main_count[j] / total * log2(main_count[j] / total)
+            main_entropy -= (main_count[j] / total) * (log2(main_count[j] / total))
         else:
             continue
+
     for j in range(left_count.size):
         if (left_count[j] != 0):
-            left_entropy -= left_count[j] / total * log2(left_count[j] / total)
+            left_entropy -= (left_count[j] / left) * (log2(left_count[j] / left))
         else:
             continue
+    left_entropy *= (left / total)
+
     for j in range(right_count.size):
         if (right_count[j] != 0):
-            right_entropy -= right_count[j] / total * log2(right_count[j] / total)
+            right_entropy -= (right_count[j] / right) * (log2(right_count[j] / right))
         else:
             continue
+    right_entropy *= (right / total)
     
     # Return the information gain
     return (main_entropy - sum(left_count) / total * left_entropy - sum(right_count) / total * right_entropy)
@@ -193,8 +197,8 @@ def decision_tree(training_file, test_file, option, pruning_thr):
 
     # Traverse
     current_level = [tree]
-    # while current_level:
-    for i in range(5):
+    while current_level:
+    # for i in range(5):
         next_level = []
         for node in current_level:
             print('tree=%2d, node=%3d, feature=%2d, thr=%6.2f, gain=%f\n' % (1, node.id, node.attribute, node.threshold, node.gain))
@@ -203,8 +207,7 @@ def decision_tree(training_file, test_file, option, pruning_thr):
             if (node.right):
                 next_level.append(node.right)
             current_level = next_level
-    # print('ID=%5d, output=%14.4f, target value = %10.4f, squared error = %.4f' % (i+1, e[i], t[i], (e[i] - t[i])**2))
-
+            
 s = 0
 nodeID = 1
 setrecursionlimit(5000)
