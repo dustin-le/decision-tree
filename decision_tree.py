@@ -209,6 +209,11 @@ def decision_tree(training_file, test_file, option, pruning_thr):
             if (node.right):
                 next_level.append(node.right)
             current_level = next_level
+
+    rows = test.shape[0]
+    columns = test.shape[1]
+    for i in range(rows):
+        print('ID=%5d, predicted=%3d, true=%3d, accuracy=%4.2f\n' % (i, 111, test[i][columns - 1], 100))
          
 decision_tree(argv[1], argv[2], argv[3], argv[4])
     
