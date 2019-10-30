@@ -64,26 +64,32 @@ def choose_attribute(examples, attributes, option):
     # Optimized
     if (option == 'optimized'):
         max_gain = best_attribute = best_threshold = -1
-        for A in attributes:
-            attribute_values = examples.T[A]
+        temp = []
+        for i in range(attributes.shape[0]):
+            temp.append(i)
+        for i in range(len(temp)):
+            attribute_values = attributes[i]
             L = min(attribute_values)
             M = max(attribute_values)
             
             for K in range(1, 51):
                 threshold = L + K * (M - L) / 51
-                gain = information_gain(examples, A, threshold)
+                gain = information_gain(examples, i, threshold)
 
                 if gain > max_gain:
                     max_gain = gain
-                    best_attribute = A
+                    best_attribute = i
                     best_threshold = threshold
         return (best_attribute, best_threshold, gain)
 
     # Randomized
     if (option == 'randomized'):
-        max_gain = best_attribute = best_threshold = -1
-        A = random.choice(attributes)
-        attribute_values = examples.T[A]
+        max_gain = best_threshold = -1
+        temp = []
+        for i in range(attributes.shape[0]):
+            temp.append(i)
+        A = random.choice(temp)
+        attribute_values = attributes[A]
         L = min(attribute_values)
         M = max(attribute_values)
         
@@ -93,9 +99,8 @@ def choose_attribute(examples, attributes, option):
 
             if gain > max_gain:
                 max_gain = gain
-                best_attribute = A
                 best_threshold = threshold
-    return (best_attribute, best_threshold, gain)
+    return (A, best_threshold, gain)
 
 def information_gain(examples, A, threshold):
     # Initialize indices and entropies
@@ -178,7 +183,8 @@ def decision_tree(training_file, test_file, option, pruning_thr):
     examples = np.array(train)
     attributes = []
     for i in range(columns - 1):
-        attributes.append(i)
+        attributes.append(train.T[i])
+    attributes = np.array(attributes)
     
     tree = DTL(examples, attributes, distribution(examples, classes), option, int(pruning_thr), classes)
 
@@ -198,7 +204,7 @@ def decision_tree(training_file, test_file, option, pruning_thr):
                 next_level.append(node.right)
             current_level = next_level
 
-    # Traverse
+    # Traverse - Training output
     current_level = [tree]
     while current_level:
     # for i in range(5):
@@ -210,6 +216,8 @@ def decision_tree(training_file, test_file, option, pruning_thr):
             if (node.right):
                 next_level.append(node.right)
             current_level = next_level
+
+    
             
 decision_tree(argv[1], argv[2], argv[3], argv[4])
     
