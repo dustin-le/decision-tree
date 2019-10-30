@@ -135,6 +135,7 @@ def information_gain(examples, A, threshold):
             left_entropy -= (left_count[j] / left) * (log2(left_count[j] / left))
         else:
             continue
+    # Weight of left 
     left_entropy *= (left / total)
 
     for j in range(right_count.size):
@@ -142,6 +143,7 @@ def information_gain(examples, A, threshold):
             right_entropy -= (right_count[j] / right) * (log2(right_count[j] / right))
         else:
             continue
+    # Weight of right
     right_entropy *= (right / total)
     
     # Return the information gain
