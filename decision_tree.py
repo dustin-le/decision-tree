@@ -18,7 +18,7 @@ class Tree(object):
 def DTL(examples, attributes, default, option, pruning_thr, size):
     if len(examples) < pruning_thr:
         tree = Tree()
-        tree.attribute = default
+        tree.attribute = -2
         tree.threshold = -1
         tree.gain = 0
         return tree
@@ -154,7 +154,7 @@ def distribution(examples, size):
     for val in examples[:, -1]:
         count[int(val)] += 1
     # Return array of probability of i-th class
-    return (np.random.choice(np.flatnonzero((count / sum(count)) == (count / sum(count)).max())))
+    return (count / sum(count))
 
 def decision_tree(training_file, test_file, option, pruning_thr):
     train = []
@@ -204,15 +204,12 @@ def decision_tree(training_file, test_file, option, pruning_thr):
     # for i in range(5):
         next_level = []
         for node in current_level:
-            print('tree=%2d, node=%3d, feature=%2d, thr=%6.2f, gain=%f\n' % (1, node.id, node.attribute, node.threshold, node.gain))
+            print('tree=%2d, node=%3d, feature=%2d, thr=%6.2f, gain=%f\n' % (1, node.id, node.attribute + 1, node.threshold, node.gain))
             if (node.left):
                 next_level.append(node.left)
             if (node.right):
                 next_level.append(node.right)
             current_level = next_level
             
-s = 0
-nodeID = 1
-setrecursionlimit(5000)
 decision_tree(argv[1], argv[2], argv[3], argv[4])
     
