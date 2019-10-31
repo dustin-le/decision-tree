@@ -181,39 +181,200 @@ def decision_tree(training_file, test_file, option, pruning_thr):
     for i in range(columns - 1):
         attributes.append(i)
     
-    tree = DTL(examples, attributes, distribution(examples, classes), option, int(pruning_thr), classes)
+    if (option == 'forest3'):
+        tree = []
+        for i in range(3):
+            tree.append(DTL(examples, attributes, distribution(examples, classes), 'randomized', int(pruning_thr), classes))
 
-    # Assign ID numbers
-    current_level = [tree]
-    temp = 1
-    while current_level:
-        next_level = []
-        for node in current_level:
-            if (node.left):
-                temp += 1
-                node.left.id = temp
-                next_level.append(node.left)
-            if (node.right):
-                temp += 1
-                node.right.id = temp
-                next_level.append(node.right)
-            current_level = next_level
+        # Assign ID numbers
+        for i in range(3):
+            current_level = [tree[i]]
+            temp = 1
+            while current_level:
+                next_level = []
+                for node in current_level:
+                    if (node.left):
+                        temp += 1
+                        node.left.id = temp
+                        next_level.append(node.left)
+                    if (node.right):
+                        temp += 1
+                        node.right.id = temp
+                        next_level.append(node.right)
+                    current_level = next_level
 
         # Training output
-    current_level = [tree]
-    while current_level:
-        next_level = []
-        for node in current_level:
-            print('tree=%2d, node=%3d, feature=%2d, thr=%6.2f, gain=%f\n' % (1, node.id, node.attribute + 1, node.threshold, node.gain))
-            if (node.left):
-                next_level.append(node.left)
-            if (node.right):
-                next_level.append(node.right)
-            current_level = next_level
+        for i in range(3):
+            current_level = [tree[i]]
+            while current_level:
+                next_level = []
+                for node in current_level:
+                    print('tree=%2d, node=%3d, feature=%2d, thr=%6.2f, gain=%f\n' % (i + 1, node.id, node.attribute + 1, node.threshold, node.gain))
+                    if (node.left):
+                        next_level.append(node.left)
+                    if (node.right):
+                        next_level.append(node.right)
+                    current_level = next_level
 
-    # Classification output
-    rows = test.shape[0]
-    columns = test.shape[1]
+        # Classification output
+        rows = test.shape[0]
+        columns = test.shape[1]
+        predicted = [[0 for y in range(2)] for i in range(rows)]
+        current_level = tree
+
+        for i in range(rows):
+            dist = []
+            for j in range(3):
+                current_level = tree[j]
+                # Traverse down tree based on attribute and threshold
+                while current_level:
+                    if (test[i][int(current_level.attribute)] < current_level.threshold):
+                        if (current_level.left == None):
+                            break
+                        current_level = current_level.left
+                    if (test[i][int(current_level.attribute)] >= current_level.threshold):
+                        if (current_level.right == None):
+                            break
+                        current_level = current_level.right
+                
+                # Check if leaf node
+                if (current_level.threshold == -1):
+                    temp = np.array(current_level.distribution)
+                    dist.append(temp)
+                    # If tie
+                    if (np.count_nonzero(temp == np.max(temp)) > 1):
+                        predicted[i][1] = (1 / np.count_nonzero(temp == np.max(temp)))
+            dist = np.array(dist)
+            ans = np.mean(dist, axis=0)
+            predicted[i][0] = np.argmax(ans)
+
+        classification_accuracy = 0
+        for i in range(rows):
+            accuracy = 0
+            if (predicted[i][0] == test[i][columns - 1] and predicted[i][1] == 0):
+                accuracy = 1
+                classification_accuracy += 1
+            elif (predicted[i][0] == test[i][columns - 1] and predicted[i][1] != 0):
+                accuracy = predicted[i][1]
+                classification_accuracy += predicted[i][1]
+            print('ID=%5d, predicted=%3d, true=%3d, accuracy=%4.2f\n' % (i, predicted[i][0], test[i][columns - 1], accuracy))
+
+        print('classification accuracy=%6.4f\n' % (classification_accuracy / rows))
+
+    elif (option == 'forest15'):
+        tree = []
+        for i in range(15):
+            tree.append(DTL(examples, attributes, distribution(examples, classes), 'randomized', int(pruning_thr), classes))
+
+        # Assign ID numbers
+        for i in range(15):
+            current_level = [tree[i]]
+            temp = 1
+            while current_level:
+                next_level = []
+                for node in current_level:
+                    if (node.left):
+                        temp += 1
+                        node.left.id = temp
+                        next_level.append(node.left)
+                    if (node.right):
+                        temp += 1
+                        node.right.id = temp
+                        next_level.append(node.right)
+                    current_level = next_level
+
+        # Training output
+        for i in range(15):
+            current_level = [tree[i]]
+            while current_level:
+                next_level = []
+                for node in current_level:
+                    print('tree=%2d, node=%3d, feature=%2d, thr=%6.2f, gain=%f\n' % (i + 1, node.id, node.attribute + 1, node.threshold, node.gain))
+                    if (node.left):
+                        next_level.append(node.left)
+                    if (node.right):
+                        next_level.append(node.right)
+                    current_level = next_level
+
+        # Classification output
+        rows = test.shape[0]
+        columns = test.shape[1]
+        predicted = [[0 for y in range(2)] for i in range(rows)]
+        current_level = tree
+
+        for i in range(rows):
+            dist = []
+            for j in range(15):
+                current_level = tree[j]
+                # Traverse down tree based on attribute and threshold
+                while current_level:
+                    if (test[i][int(current_level.attribute)] < current_level.threshold):
+                        if (current_level.left == None):
+                            break
+                        current_level = current_level.left
+                    if (test[i][int(current_level.attribute)] >= current_level.threshold):
+                        if (current_level.right == None):
+                            break
+                        current_level = current_level.right
+                
+                # Check if leaf node
+                if (current_level.threshold == -1):
+                    temp = np.array(current_level.distribution)
+                    dist.append(temp)
+                    # If tie
+                    if (np.count_nonzero(temp == np.max(temp)) > 1):
+                        predicted[i][1] = (1 / np.count_nonzero(temp == np.max(temp)))
+            dist = np.array(dist)
+            ans = np.mean(dist, axis=0)
+            predicted[i][0] = np.argmax(ans)
+
+        classification_accuracy = 0
+        for i in range(rows):
+            accuracy = 0
+            if (predicted[i][0] == test[i][columns - 1] and predicted[i][1] == 0):
+                accuracy = 1
+                classification_accuracy += 1
+            elif (predicted[i][0] == test[i][columns - 1] and predicted[i][1] != 0):
+                accuracy = predicted[i][1]
+                classification_accuracy += predicted[i][1]
+            print('ID=%5d, predicted=%3d, true=%3d, accuracy=%4.2f\n' % (i, predicted[i][0], test[i][columns - 1], accuracy))
+
+        print('classification accuracy=%6.4f\n' % (classification_accuracy / rows))
+
+    else:
+        tree = DTL(examples, attributes, distribution(examples, classes), option, int(pruning_thr), classes)
+
+        # Assign ID numbers
+        current_level = [tree]
+        temp = 1
+        while current_level:
+            next_level = []
+            for node in current_level:
+                if (node.left):
+                    temp += 1
+                    node.left.id = temp
+                    next_level.append(node.left)
+                if (node.right):
+                    temp += 1
+                    node.right.id = temp
+                    next_level.append(node.right)
+                current_level = next_level
+
+        # Training output
+        current_level = [tree]
+        while current_level:
+            next_level = []
+            for node in current_level:
+                print('tree=%2d, node=%3d, feature=%2d, thr=%6.2f, gain=%f\n' % (1, node.id, node.attribute + 1, node.threshold, node.gain))
+                if (node.left):
+                    next_level.append(node.left)
+                if (node.right):
+                    next_level.append(node.right)
+                current_level = next_level
+
+        # Classification output
+        rows = test.shape[0]
+        columns = test.shape[1]
         predicted = [[0 for y in range(2)] for i in range(rows)]
         current_level = tree
 
@@ -239,7 +400,7 @@ def decision_tree(training_file, test_file, option, pruning_thr):
                 predicted[i][0] = np.argmax(temp)
 
         classification_accuracy = 0
-    for i in range(rows):
+        for i in range(rows):
             accuracy = 0
             if (predicted[i][0] == test[i][columns - 1] and predicted[i][1] == 0):
                 accuracy = 1
