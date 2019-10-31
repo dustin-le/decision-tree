@@ -14,11 +14,12 @@ class Tree(object):
         self.attribute = None
         self.threshold = None
         self.gain = None
+        self.distribution = []
 
 def DTL(examples, attributes, default, option, pruning_thr, size):
     if len(examples) < pruning_thr:
         tree = Tree()
-        tree.attribute = default
+        tree.attribute = -2
         tree.threshold = -1
         tree.gain = 0
         return tree
@@ -153,7 +154,7 @@ def distribution(examples, size):
     for val in examples[:, -1]:
         count[int(val)] += 1
     # Return array of probability of i-th class
-    return (np.random.choice(np.flatnonzero((count / sum(count)) == (count / sum(count)).max())))
+    return (count / sum(count))
 
 def decision_tree(training_file, test_file, option, pruning_thr):
     train = []
