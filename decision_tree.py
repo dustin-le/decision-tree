@@ -22,6 +22,7 @@ def DTL(examples, attributes, default, option, pruning_thr, size):
         tree.attribute = -2
         tree.threshold = -1
         tree.gain = 0
+        tree.distribution.append(default)
         return tree
     
     # If all examples have the same class, then return the class
@@ -198,10 +199,9 @@ def decision_tree(training_file, test_file, option, pruning_thr):
                 next_level.append(node.right)
             current_level = next_level
 
-    # Traverse
+        # Training output
     current_level = [tree]
     while current_level:
-    # for i in range(5):
         next_level = []
         for node in current_level:
             print('tree=%2d, node=%3d, feature=%2d, thr=%6.2f, gain=%f\n' % (1, node.id, node.attribute + 1, node.threshold, node.gain))
@@ -214,8 +214,42 @@ def decision_tree(training_file, test_file, option, pruning_thr):
     # Classification output
     rows = test.shape[0]
     columns = test.shape[1]
+        predicted = [[0 for y in range(2)] for i in range(rows)]
+        current_level = tree
+
+        for i in range(rows):
+            current_level = tree
+            # Traverse down tree based on attribute and threshold
+            while current_level:
+                if (test[i][int(current_level.attribute)] < current_level.threshold):
+                    if (current_level.left == None):
+                        break
+                    current_level = current_level.left
+                if (test[i][int(current_level.attribute)] >= current_level.threshold):
+                    if (current_level.right == None):
+                        break
+                    current_level = current_level.right
+            
+            # Check if leaf node
+            if (current_level.threshold == -1):
+                temp = np.array(current_level.distribution)
+                # If tie
+                if (np.count_nonzero(temp == np.max(temp)) > 1):
+                    predicted[i][1] = (1 / np.count_nonzero(temp == np.max(temp)))
+                predicted[i][0] = np.argmax(temp)
+
+        classification_accuracy = 0
     for i in range(rows):
-        print('ID=%5d, predicted=%3d, true=%3d, accuracy=%4.2f\n' % (i, 111, test[i][columns - 1], 100))
+            accuracy = 0
+            if (predicted[i][0] == test[i][columns - 1] and predicted[i][1] == 0):
+                accuracy = 1
+                classification_accuracy += 1
+            elif (predicted[i][0] == test[i][columns - 1] and predicted[i][1] != 0):
+                accuracy = predicted[i][1]
+                classification_accuracy += predicted[i][1]
+            print('ID=%5d, predicted=%3d, true=%3d, accuracy=%4.2f\n' % (i, predicted[i][0], test[i][columns - 1], accuracy))
+
+        print('classification accuracy=%6.4f\n' % (classification_accuracy / rows))
          
 decision_tree(argv[1], argv[2], argv[3], argv[4])
     
